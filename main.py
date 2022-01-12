@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.fields.core import SelectField
 from wtforms.validators import DataRequired, URL
+from csv import writer 
 import csv
 
 app = Flask(__name__)
@@ -22,16 +23,7 @@ class CafeForm(FlaskForm):
     
     submit = SubmitField('Submit')
 
-# Exercise:
-# add: Location URL, open time, closing time, coffee rating, wifi rating, power outlet rating fields
-# make coffee/wifi/power a select element with choice of 0 to 5.
-#e.g. You could use emojis ☕️/💪/✘/🔌
-# make all fields required except submit
-# use a validator to check that the URL field has a URL entered.
-# ---------------------------------------------------------------------------
 
-
-# all Flask routes below
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -41,10 +33,19 @@ def home():
 def add_cafe():
     form = CafeForm()
     if form.validate_on_submit():
-        print("True")
-    # Exercise:
-    # Make the form write a new row into cafe-data.csv
-    # with   if form.validate_on_submit()
+        print(form.data)
+        data_list = []
+        for value in form.data.values():
+            data_list.append(value)
+
+        cleaned_data_list = []
+        for n in range(len(data_list) - 2):   #To get rid of the submit=True and csrf_token
+            cleaned_data_list.append(data_list[n])
+
+        with open('cafe-data.csv', 'a+', newline='') as csv:
+            csv_write = writer(csv)
+            csv_write.writerow(cleaned_data_list)
+
     return render_template('add.html', form=form)
 
 
